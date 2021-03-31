@@ -121,29 +121,61 @@ def prepGraph(N,E):
         dist = E[x][2]
         graph[N.index(start)][N.index(stop)] = float(dist)
     #IMPORTANT: this is set up to treat every edge as undirected
-    #   need to implement a fix for directed    
+    #   need to implement a fix to allow for directed nodes  
     for x in range(len(E)):
         start = E[x][1]
         stop = E[x][0]
         dist = E[x][2]
         graph[N.index(start)][N.index(stop)] = float(dist)
     return graph
-        
+
+#Computes the floyd-warshall algorithm with the given graph
+#   the input graph should hold an adjacency matrix for all the nodes
+#   returns path, the completed floyd-warshall matrix
+#       each [x][y] holds the shortest distance from node x to node y
 def pathGraph(graph):
+    #creates a deep copy of graph to prevent shallow copy errors
     path = copy.deepcopy(graph)
+    
     for x in range(len(path)):
         for y in range(len(path)):
             for z in range(len(path)):
+                #shortest distance from node to itself will always be nan
                 if(y==z):
                     continue
                 else: 
+                    
+                    #sums the distances betwen the next two edges, treating nan as 0
+                    #NOTE - this is probably going to cause errors if [y][x] is nan and 
+                    #   [x][z] is not (or vice versa) - test this more
                     nextEdge = np.nansum(path[y][x]+path[x][z])
+                    
+                    #both of the next two edges are nan
                     if(not nextEdge):
                         nextEdge = INF
+                        
+                    #gets the minimum value between path[y][z] and nextEdge
                     hold = np.nanmin([path[y][z],nextEdge])
+                    
+                    #if hold is INF or nan, then no path exists between the two nodes
+                    #otherwise, sets [y][z] to hold 
                     if(hold!=INF and hold!=np.nan):
                         path[y][z]=hold
     return path           
+
+#finds the average distance from a node to a range of other nodes
+#takes in the graph and 3 integers (graph indicies):
+#   start is the index of the first element in the range
+#   stop is the index of the last element in the range
+#   node is the point of origin
+#   returns the average distance 
+def avgDist(graph,start,stop,node):
+    pathSum = 0
+    for y in range(start,stop):
+        #does not add nodes that it has no path to
+        if(graph[node][y]!=np.nan):
+            pathSum+=graph[node][y]
+    return pathSum/(stop-start)                    
 
 def main():
     #user specifies the input file
