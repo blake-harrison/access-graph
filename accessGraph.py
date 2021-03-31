@@ -4,7 +4,7 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "0.2.0"
+__version__ = "0.4.0"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
 __status__ = "Development"
@@ -13,6 +13,7 @@ __status__ = "Development"
 import sys
 import os.path
 from os import path
+import copy
 
 #note - numpy is used for array handling for the graph
 #if you do not have this package installed, run:
@@ -118,10 +119,31 @@ def prepGraph(N,E):
         start = E[x][0]
         stop = E[x][1]
         dist = E[x][2]
-        graph[N.index(start)][N.index(stop)] = int(dist)
+        graph[N.index(start)][N.index(stop)] = float(dist)
+    #IMPORTANT: this is set up to treat every edge as undirected
+    #   need to implement a fix for directed    
+    for x in range(len(E)):
+        start = E[x][1]
+        stop = E[x][0]
+        dist = E[x][2]
+        graph[N.index(start)][N.index(stop)] = float(dist)
     return graph
         
-    
+def pathGraph(graph):
+    path = copy.deepcopy(graph)
+    for x in range(len(path)):
+        for y in range(len(path)):
+            for z in range(len(path)):
+                if(y==z):
+                    continue
+                else: 
+                    nextEdge = np.nansum(path[y][x]+path[x][z])
+                    if(not nextEdge):
+                        nextEdge = INF
+                    hold = np.nanmin([path[y][z],nextEdge])
+                    if(hold!=INF and hold!=np.nan):
+                        path[y][z]=hold
+    return path           
 
 def main():
     #user specifies the input file
@@ -137,9 +159,6 @@ def main():
     #reads the input file in
     readFile(inFile,G,R,I,E)
     
-    #printLists(G,R,I,E)
-    #print("\n\n\n")
-    
     #splits each item in each list on spaces
     #i.e. ["R001 RA One"] becomes ["R001","RA","One"] 
     for x in range(0,len(G)):
@@ -151,14 +170,15 @@ def main():
     for x in range(0,len(E)):
         E[x] = E[x].split()
     
-    #printLists(G,R,I,E)
-    
     #adds a list that holds N, which contains all the nodes
     N=[]
     loadDijkstra(G,R,I,N)
     graph=prepGraph(N,E) 
-    print(N)
+    path = pathGraph(graph)
     print(graph)
+    print(N)
+    print(path)
+
 
 #executes main function
 if __name__ == "__main__":
