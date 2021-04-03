@@ -4,10 +4,10 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "0.5.0"
+__version__ = "1.0.0"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
-__status__ = "Development"
+__status__ = "Release"
 #This program was built using python v3.9.1. It has not been tested with other versions.
 
 import sys
@@ -180,13 +180,11 @@ def avgDist(graph,start,stop,num,node):
     short = []
     nanCount = 0
     pathSum = 0
-    print(start, stop)
     if(num > stop-start or num <= 0):
         sys.exit("Error: Improper Number of Nodes Requested. You must request a numer of nodes greater than 0 but less than or equal to the amount of G-nodes the graph has.\n Your graph has " + str(stop-start) + " G-nodes.\n You requrested " + str(num) + " G-nodes.\n")  
     for x in range(start,stop):
         if(graph[node][x]!=np.nan):
             hold.append(graph[node][x])
-    print(hold)
     for y in range(len(hold)):
         val = np.nanmin(hold)
         if(val!=INF and val!=np.nan):
@@ -196,7 +194,7 @@ def avgDist(graph,start,stop,num,node):
         num = len(short)
     for z in range(num):
         pathSum += short[z]
-    return pathSun/num
+    return pathSum/num
 
 #returns an ordered list of all the nodes R ranked by average distance to G nodes
 #takes in:
@@ -209,17 +207,41 @@ def avgDist(graph,start,stop,num,node):
 #   far, a boolean that returns the nodes with the farthest avg distance if true, and 
 #       the least average distance if false.
 #       By default, this value is set to True
-def getIsol(graph,G,R,num,top,far = True):
+def getIsol(graph,G,R,num,far = True):
     hold = []
     order = []
     for i in range(G,G+R):
         hold.append([avgDist(graph,0,G,num,i),i])
     for j in range(len(hold)):
-        val = np.nanmax(hold,0)
-        if(val!=0 and val!=INF and val!=np.nan):
-            order.append(hold.index(val))
-        hold[hold.index(val)] = 0
-    return order
+        val = hold[j][0]
+        sIndex = j
+        for k in range(len(hold)):
+            if(val>hold[k][0] and hold[k][0]!=INF):
+                val=hold[k][0]
+                sIndex = k
+        order.append(copy.deepcopy(hold[sIndex]))
+        hold[sIndex][0] = INF
+    if(not far):
+        close = []
+        for x in range(num):
+            close.append(copy.deepcopy(order[-x]))
+        return close
+    else:
+        return order
+
+def getTop(R, order, gNum, top):
+    print("Residential Area     Average Distance to Grocery Store")
+    for x in range(top):
+        printStr = ""
+        numStr = ""
+        for y in range(1,len(R[order[x][1]-gNum])):
+            printStr += str(R[order[x][1]-gNum][y])
+            printStr += " "
+        printStr = printStr.ljust(30) 
+        numStr += str("{:.4f}".format(order[x][0]/1000))
+        numStr += " km"
+        printStr += numStr.rjust(5)
+        print(printStr)       
 
 def main():
     #user specifies the input file
@@ -258,8 +280,10 @@ def main():
     #print(path)
     
     order = []
-    order = getIsol(graph,len(G),len(R),len(G),len(R))
-    print(order)
+    order = getIsol(path,len(G),len(R),len(G))
+    #print(order)
+    getTop(R,order,len(G),len(order))
+    print("\n\n\n")
 
 #executes main function
 if __name__ == "__main__":
