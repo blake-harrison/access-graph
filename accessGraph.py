@@ -4,7 +4,7 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "0.4.0"
+__version__ = "0.5.0"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
 __status__ = "Development"
@@ -25,7 +25,7 @@ import numpy as np
 #approximated at 9,999,999 because we assume no single 
 #   path length will come close to this
 #this can be adjusted to account for larger size values
-INF = 999999
+INF = 9999999
 
 #reads in the input file
 #takes 5 parameters:
@@ -94,7 +94,9 @@ def printLists(G,R,I,E):
 #   R (residential areas) 
 #   I (intersections) (our artificial nodes for connectivity purposes)
 #   N (a list that will be filled all of the nodes)      
-def loadDijkstra(G,R,I,N):
+#       note: other functions require that the nodes be loaded in this order,
+#       or they will not function correctly
+def loadNodes(G,R,I,N):
     for x in range(len(G)):
         N.append(G[x][0])
     for x in range(len(R)):
@@ -167,15 +169,57 @@ def pathGraph(graph):
 #takes in the graph and 3 integers (graph indicies):
 #   start is the index of the first element in the range
 #   stop is the index of the last element in the range
+#   num is the number of elements to take from the range,
+#       prioritizing the nearest nodes
 #   node is the point of origin
-#   returns the average distance 
-def avgDist(graph,start,stop,node):
+#   returns the average distance from node to a number of nodes (num)
+#       from graph, in that range (start,stop)
+#   If 
+def avgDist(graph,start,stop,num,node):
+    hold = []
+    short = []
+    nanCount = 0
     pathSum = 0
-    for y in range(start,stop):
-        #does not add nodes that it has no path to
-        if(graph[node][y]!=np.nan):
-            pathSum+=graph[node][y]
-    return pathSum/(stop-start)                    
+    print(start, stop)
+    if(num > stop-start or num <= 0):
+        sys.exit("Error: Improper Number of Nodes Requested. You must request a numer of nodes greater than 0 but less than or equal to the amount of G-nodes the graph has.\n Your graph has " + str(stop-start) + " G-nodes.\n You requrested " + str(num) + " G-nodes.\n")  
+    for x in range(start,stop):
+        if(graph[node][x]!=np.nan):
+            hold.append(graph[node][x])
+    print(hold)
+    for y in range(len(hold)):
+        val = np.nanmin(hold)
+        if(val!=INF and val!=np.nan):
+            short.append(val)
+        hold[hold.index(val)]=INF
+    if(len(short)<=num):
+        num = len(short)
+    for z in range(num):
+        pathSum += short[z]
+    return pathSun/num
+
+#returns an ordered list of all the nodes R ranked by average distance to G nodes
+#takes in:
+#   graph, a the final shortest path matrix
+#   G, the number of nodes that correspond to grocery stores
+#   R, the number of nodes that correspond to residential areas
+#   num, the number of grocery stores to get for each residential area
+#       (prioritizing the nearest grocery stores)
+#   top, the number of elements to return
+#   far, a boolean that returns the nodes with the farthest avg distance if true, and 
+#       the least average distance if false.
+#       By default, this value is set to True
+def getIsol(graph,G,R,num,top,far = True):
+    hold = []
+    order = []
+    for i in range(G,G+R):
+        hold.append([avgDist(graph,0,G,num,i),i])
+    for j in range(len(hold)):
+        val = np.nanmax(hold,0)
+        if(val!=0 and val!=INF and val!=np.nan):
+            order.append(hold.index(val))
+        hold[hold.index(val)] = 0
+    return order
 
 def main():
     #user specifies the input file
@@ -204,13 +248,18 @@ def main():
     
     #adds a list that holds N, which contains all the nodes
     N=[]
-    loadDijkstra(G,R,I,N)
+    loadNodes(G,R,I,N)
     graph=prepGraph(N,E) 
     path = pathGraph(graph)
-    print(graph)
-    print(N)
-    print(path)
-
+    #print(graph)
+    #print("\n")
+    #print(N)
+    #print("\n")
+    #print(path)
+    
+    order = []
+    order = getIsol(graph,len(G),len(R),len(G),len(R))
+    print(order)
 
 #executes main function
 if __name__ == "__main__":
