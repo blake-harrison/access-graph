@@ -4,7 +4,7 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "1.0.0"
+__version__ = "1.1.0"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
 __status__ = "Release"
@@ -180,18 +180,31 @@ def avgDist(graph,start,stop,num,node):
     short = []
     nanCount = 0
     pathSum = 0
+    
+    #if num is not a valid input
     if(num > stop-start or num <= 0):
         sys.exit("Error: Improper Number of Nodes Requested. You must request a numer of nodes greater than 0 but less than or equal to the amount of G-nodes the graph has.\n Your graph has " + str(stop-start) + " G-nodes.\n You requrested " + str(num) + " G-nodes.\n")  
+    
+    #appends hold with the lengths of all existing paths
     for x in range(start,stop):
         if(graph[node][x]!=np.nan):
             hold.append(graph[node][x])
+    
+    #appends short with each length in order from shortest to longest
+    #after a value has been added, it is set to our infinity approximation
     for y in range(len(hold)):
         val = np.nanmin(hold)
         if(val!=INF and val!=np.nan):
             short.append(val)
         hold[hold.index(val)]=INF
+        
+    #handles if the amount of added path lengths are less than the requested number
+    # (this should only be true if the node does not have a path to some of the nodes
+    #  in the start-stop range)
     if(len(short)<=num):
         num = len(short)
+        
+    #sums the num smallest lengths
     for z in range(num):
         pathSum += short[z]
     return pathSum/num
@@ -210,8 +223,12 @@ def avgDist(graph,start,stop,num,node):
 def getIsol(graph,G,R,num,far = True):
     hold = []
     order = []
+    
+    #calculates the average distance to the grocery stores for each residential node
     for i in range(G,G+R):
         hold.append([avgDist(graph,0,G,num,i),i])
+    
+    #orders the nodes by the shortest avg distance to num grocery stores
     for j in range(len(hold)):
         val = hold[j][0]
         sIndex = j
@@ -221,23 +238,44 @@ def getIsol(graph,G,R,num,far = True):
                 sIndex = k
         order.append(copy.deepcopy(hold[sIndex]))
         hold[sIndex][0] = INF
+        
+    #if the user wants the closest instead of farthest
     if(not far):
         close = []
+        #copies the list in reverse
+        #probably more efficient ways to do this, maybe fix it later
         for x in range(num):
             close.append(copy.deepcopy(order[-x]))
         return close
+    #default setting
     else:
         return order
 
-def getTop(R, order, gNum, top):
+#outputs a number of results
+#takes in several parameters:
+#   R is the list of residential area nodes
+#   order is a list containing each residential node
+#       and its average distance to a set number of G-nodes
+#       Order is obtained from the getIsol function
+#   gNum is the number of G-nodes
+#   top is the number of results to output
+#       by default this is set to the length of order (printing all results)
+def getTop(R, order, gNum, top = INF):
     print("Residential Area     Average Distance to Grocery Store")
+    
+    #default setting, prints all 
+    if top == INF:
+        top = len(order)
     for x in range(top):
         printStr = ""
         numStr = ""
+        
+        #takes the length of each string in R, ignores the R### code
         for y in range(1,len(R[order[x][1]-gNum])):
             printStr += str(R[order[x][1]-gNum][y])
             printStr += " "
         printStr = printStr.ljust(30) 
+        #adds the average distance
         numStr += str("{:.4f}".format(order[x][0]/1000))
         numStr += " km"
         printStr += numStr.rjust(5)
@@ -271,18 +309,20 @@ def main():
     #adds a list that holds N, which contains all the nodes
     N=[]
     loadNodes(G,R,I,N)
-    graph=prepGraph(N,E) 
-    path = pathGraph(graph)
-    #print(graph)
-    #print("\n")
-    #print(N)
-    #print("\n")
-    #print(path)
     
+    #gets the adjacency matrix
+    graph=prepGraph(N,E) 
+    
+    #gets the Floyd-Warshall matrix from the adjacency matrix
+    path = pathGraph(graph)
+    
+    #gets the average distance to a number of grocery stores for each node,
+    #   then orders them from most avg dist to greatest
     order = []
     order = getIsol(path,len(G),len(R),len(G))
-    #print(order)
-    getTop(R,order,len(G),len(order))
+    
+    #prints the output
+    getTop(R,order,len(G))
     print("\n\n\n")
 
 #executes main function
