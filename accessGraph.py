@@ -4,7 +4,7 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "1.3.0"
+__version__ = "1.4.0"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
 __status__ = "Release"
@@ -14,6 +14,7 @@ import sys
 import os.path
 import os
 import copy
+import contextlib
 
 #note - numpy is used for array handling for the graph
 #if you do not have this package installed, run:
@@ -63,7 +64,7 @@ def readFile(inFile, G, R, I, E):
                     elif line[0] == 'I':
                         I.append(line.replace("\n",""))
                     #case: invalid input
-                    else: sys.exit("Error: Invalid Input Detected on Line " + str(ln) + " in file '" + inFile + "'\n")
+                    else: sys.exit("    Error: Invalid Input Detected on Line " + str(ln) + " in file '" + inFile + "'\n")
                 
                 #if edges are being read in
                 else:
@@ -75,7 +76,7 @@ def readFile(inFile, G, R, I, E):
                         E.append(line.replace("\n",""))     
     else:
         os.system('cls' if os.name == 'nt' else 'clear') 
-        sys.exit("Error: Invalid Input File Name: '" + inFile + "' could not be found.")           
+        sys.exit("    Error: Invalid Input File Name: '" + inFile + "' could not be found.")           
 
 #prints the lists - used primarily for debugging purposes
 #takes in 4 lists:
@@ -185,7 +186,7 @@ def avgDist(graph,start,stop,num,node):
     
     #if num is not a valid input
     if(num > stop-start or num <= 0):
-        sys.exit("Error: Improper Number of Nodes Requested. You must request a numer of nodes greater than 0 but less than or equal to the amount of G-nodes the graph has.\n Your graph has " + str(stop-start) + " G-nodes.\n You requrested " + str(num) + " G-nodes.\n")  
+        sys.exit("    Error: Improper Number of Nodes Requested. You must request a numer of nodes greater than 0 but less than or equal to the amount of G-nodes the graph has.\n Your graph has " + str(stop-start) + " G-nodes.\n You requrested " + str(num) + " G-nodes.\n")  
     
     #appends hold with the lengths of all existing paths
     for x in range(start,stop):
@@ -219,10 +220,10 @@ def avgDist(graph,start,stop,num,node):
 #   num, the number of grocery stores to get for each residential area
 #       (prioritizing the nearest grocery stores)
 #   top, the number of elements to return
-#   far, a boolean that returns the nodes with the farthest avg distance if true, and 
-#       the least average distance if false.
-#       By default, this value is set to True
-def getIsol(graph,G,R,num,far = True):
+#   close, a boolean that returns the nodes with the farthest avg distance if false, and 
+#       the least average distance if true.
+#       By default, this value is set to false
+def getIsol(graph,G,R,num,close = False):
     hold = []
     order = []
     
@@ -242,13 +243,13 @@ def getIsol(graph,G,R,num,far = True):
         hold[sIndex][0] = INF
         
     #if the user wants the closest instead of farthest
-    if(not far):
-        close = []
+    if(close):
+        rev = []
         #copies the list in reverse
         #probably more efficient ways to do this, maybe fix it later
-        for x in range(num):
-            close.append(copy.deepcopy(order[-x]))
-        return close
+        for x in range(len(order)):
+            rev.append(copy.deepcopy(order[len(order)-1-x]))
+        return rev
     #default setting
     else:
         return order
@@ -266,7 +267,7 @@ def getTop(R, order, gNum, top = INF):
     print("Residential Area     Average Distance to Grocery Store")
     
     #default setting, prints all 
-    if top == INF:
+    if top > len(order):
         top = len(order)
     for x in range(top):
         printStr = ""
@@ -292,10 +293,17 @@ def main():
     R = [] #holds residential areas
     I = [] #holds intersections
     E = [] #holds edges
+    opt = [False,False,INF]
+    optInput = '5'
+    oFile = "output.txt"
     
     while(run):
         userIn = printMenu(badInput,inFile)
         if(userIn == '1'):
+            G.clear()
+            R.clear()
+            I.clear()
+            E.clear()
             badInput = False
             os.system('cls' if os.name == 'nt' else 'clear')
             
@@ -316,6 +324,7 @@ def main():
                 
             #adds a list that holds N, which contains all the nodes
             N=[]
+            N.clear()
             loadNodes(G,R,I,N)
     
             #gets the adjacency matrix
@@ -323,11 +332,6 @@ def main():
     
             #gets the Floyd-Warshall matrix from the adjacency matrix
             path = pathGraph(graph)
-            
-            #gets the average distance to a number of grocery stores for each node,
-            #   then orders them from most avg dist to greatest
-            order = []
-            order = getIsol(path,len(G),len(R),len(G))
             
             print("\n\n\n    File Loaded Successfully")
             print("\n\n\n\n\n\n\n")
@@ -339,17 +343,66 @@ def main():
                 print("\n    Error: No Input File Specified\n\n\n\n")
                 input("    Press Enter to Continue...")
                 continue
-            #prints the output
-            print("\n")
-            getTop(R,order,len(G))
-            print("\n\n\n")
-            input("    Press Enter to Continue...")
             
+            #gets the average distance to a number of grocery stores for each node,
+            #   then orders them from most avg dist to greatest
+            order = []
+            order.clear()
+            order = getIsol(path,len(G),len(R),len(G),opt[1])
+            
+            #prints the output
+            if(not opt[0]):
+                print("\n")
+                getTop(R,order,len(G),int(opt[2]))
+                print("\n\n\n")
+                input("    Press Enter to Continue...")
+            else:
+                #creates file if it doesn't exist:
+                with open(oFile,'w') as file:
+                    with contextlib.redirect_stdout(file):
+                        getTop(R,order,len(G),int(opt[2]))
+                print("\n    Output Sent to file: " + oFile + "\n\n\n")
+                print("\n\n\n")
+                input("    Press Enter to Continue...")
         
         elif(userIn == '3'):
-            os.system('cls' if os.name == 'nt' else 'clear')
-            print("\n    Coming Soon\n\n\n")
-            input("    Press Enter to Continue...")
+            optInput = '5'
+            bad = False
+            while(optInput != '4'):
+                os.system('cls' if os.name == 'nt' else 'clear')
+                optInput = optionsMenu(opt,oFile,bad)
+                if(optInput == '1'):
+                    bad = False
+                    if(opt[0] == False):
+                        opt[0] = True
+                        os.system('cls' if os.name == 'nt' else 'clear')
+                        oFile = input("\n    Please enter a name for the output file:\n\n\n")
+                    else:
+                        opt[0] = False
+                elif(optInput == '2'):
+                    bad = False
+                    if(opt[1] == False):
+                        opt[1] = True
+                    else:
+                        opt[1] = False
+                elif(optInput == '3'):
+                    bad = False
+                    setOptNum = True
+                    while(setOptNum):
+                        if(not setOptNum):
+                            print("Error: You Must Input a Number")
+                        os.system('cls' if os.name == 'nt' else 'clear')
+                        setOpt = input("\n    Input a numeric value, or 'all':\n\n\n")
+                        if(not setOpt.isnumeric() or setOpt.lower() != 'all'):
+                            setOptNum = False
+                        if(setOpt.isnumeric()):
+                            opt[2] = setOpt
+                        elif(setOpt.lower() == 'all'):
+                            opt[2] = INF
+                elif(optInput == '4'):
+                    bad = False
+                else:
+                    bad = True
         
         elif(userIn == '4'):
             os.system('cls' if os.name == 'nt' else 'clear')
@@ -370,7 +423,7 @@ def printMenu(badInput = False, inFile = ""):
                _____ _____ ______  _____ _____ 
         /\   / ____/ ____|  ____|/ ____/ ____|
        /  \ | |   | |    | |__  | (___| (___  
-      / /\ \| |   | |    |  __|  \___ \\___ \ 
+      / /\ \| |   | |    |  __|  \___ \\___  \ 
      / ____ | |___| |____| |____ ____) ____) |
     /______\_______\_____|____________|_____/ 
      / ____|  __ \    /\   |  __ \| |  | |    
@@ -380,7 +433,7 @@ def printMenu(badInput = False, inFile = ""):
      \_____|_|  \_/_/    \_|_|    |_|  |_|                                          
                                                   """)
     print("""\
-    WELCOME TO ACCESS GRAPH, v1.3.0
+    WELCOME TO ACCESS GRAPH, v1.4.0
     https://github.com/blake-harrison/access-graph
         
     Please select:
@@ -394,13 +447,50 @@ def printMenu(badInput = False, inFile = ""):
     4) Quit
         
         """)
-    print("\n   Current File: " + inFile + "\n\n")
+    print("\n    Current Input File: " + inFile + "\n\n")
     
     if(badInput):
         print("\n   Error: Invalid Input. Please Try Again\n\n")
     
     return input()
 
+#prints the user's options for settings
+#   opts is a list of options
+#   each corresponds to an option in the menu below
+#   default values for opt are:
+#       opt[0] = false
+#       opt[1] = false
+#       opt[2] = INF (All)
+#   oFile is the output file specified (defaults to output.txt)
+#   bad is True if the user input does not correspond to one of the options
+def optionsMenu(opt, oFile = "output.txt", bad = False):
+    print("\n    Options:\n")
+    print("\n    Select Number to Toggle, and Press Enter to Confirm:\n\n")
+    
+    print("    1) Output Format:\n")
+    if(not opt[0]):
+        print("      [X] To User         [ ] To File ")
+    else:
+        print("      [ ] To User         [X] To File ")
+        print("                              (Current Output File: " + oFile + ")")
+    print("\n\n    2) Rank Output By:\n")
+    if(not opt[1]):
+        print("      [X] Longest First   [ ] Shortest First ")
+    else:
+        print("      [ ] Longest First   [X] Shortest First ")
+    print("\n\n    3) Number of Top Nodes to Output\n")
+    if(opt[2] == INF):
+        print("      All")
+    elif(str(opt[2]).isnumeric()):
+        print("      " + str(opt[2]))
+    else:
+        sys.exit("    An Error Occured. Value of Opt[2] not set properly. See function optionsMenu.\n")
+    print("\n\n    4) Return to Menu\n\n\n")
+    
+    if(bad):
+        print("    Error: Invalid Input Detected. Enter a Number Corresponding to One of the Options Above\n\n")
+    
+    return input()
 
 #executes main function
 if __name__ == "__main__":
