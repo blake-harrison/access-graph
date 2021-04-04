@@ -4,7 +4,7 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
 __status__ = "Release"
@@ -300,7 +300,7 @@ def main():
             os.system('cls' if os.name == 'nt' else 'clear')
             
             #reads the input file in
-            inFile = input("\nPlease Enter the Name of Your Datafile:\n\n\n\n")
+            inFile = input("\n    Please Enter the Name of Your Datafile:\n\n\n\n")
             readFile(inFile,G,R,I,E)
         
             #splits each item in each list on spaces
@@ -329,23 +329,27 @@ def main():
             order = []
             order = getIsol(path,len(G),len(R),len(G))
             
-            print("\n\n\nFile Loaded Successfully")
+            print("\n\n\n    File Loaded Successfully")
             print("\n\n\n\n\n\n\n")
-            input("Press Enter to Continue...")
+            input("    Press Enter to Continue...")
                 
         elif(userIn == '2'):
             os.system('cls' if os.name == 'nt' else 'clear')
+            if(inFile == ""):
+                print("\n    Error: No Input File Specified\n\n\n\n")
+                input("    Press Enter to Continue...")
+                continue
             #prints the output
             print("\n")
             getTop(R,order,len(G))
             print("\n\n\n")
-            input("Press Enter to Continue...")
+            input("    Press Enter to Continue...")
             
         
         elif(userIn == '3'):
             os.system('cls' if os.name == 'nt' else 'clear')
-            print("\nComing Soon\n\n\n")
-            input("Press Enter to Continue...")
+            print("\n    Coming Soon\n\n\n")
+            input("    Press Enter to Continue...")
         
         elif(userIn == '4'):
             os.system('cls' if os.name == 'nt' else 'clear')
@@ -363,20 +367,21 @@ def printMenu(badInput = False, inFile = ""):
         inFile = "No File Loaded"
     os.system('cls' if os.name == 'nt' else 'clear')
     print("""   
-           _____ _____ ______  _____ _____ 
-    /\   / ____/ ____|  ____|/ ____/ ____|
-   /  \ | |   | |    | |__  | (___| (___  
-  / /\ \| |   | |    |  __|  \___ \\___ \ 
- / ____ | |___| |____| |____ ____) ____) |
-/______\_______\_____|____________|_____/ 
- / ____|  __ \    /\   |  __ \| |  | |    
-| |  __| |__) |  /  \  | |__) | |__| |    
-| | |_ |  _  /  / /\ \ |  ___/|  __  |    
-| |__| | | \ \ / ____ \| |    | |  | |    
- \_____|_|  \_/_/    \_|_|    |_|  |_|                                          
+               _____ _____ ______  _____ _____ 
+        /\   / ____/ ____|  ____|/ ____/ ____|
+       /  \ | |   | |    | |__  | (___| (___  
+      / /\ \| |   | |    |  __|  \___ \\___ \ 
+     / ____ | |___| |____| |____ ____) ____) |
+    /______\_______\_____|____________|_____/ 
+     / ____|  __ \    /\   |  __ \| |  | |    
+    | |  __| |__) |  /  \  | |__) | |__| |    
+    | | |_ |  _  /  / /\ \ |  ___/|  __  |    
+    | |__| | | \ \ / ____ \| |    | |  | |    
+     \_____|_|  \_/_/    \_|_|    |_|  |_|                                          
                                                   """)
     print("""\
-    WELCOME TO ACCESS GRAPH, v1.2.0
+    WELCOME TO ACCESS GRAPH, v1.3.0
+    https://github.com/blake-harrison/access-graph
         
     Please select:
             
