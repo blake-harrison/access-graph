@@ -1,0 +1,6 @@
+Residential Area     Average Distance to Grocery Store
+RA Four                       0.0275 km
+RA One                        0.0375 km
+RA Five                       0.0390 km
+RA Three                      0.0425 km
+RA Two                        0.0475 km
