@@ -4,7 +4,7 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
 __status__ = "Release"
@@ -12,7 +12,7 @@ __status__ = "Release"
 
 import sys
 import os.path
-from os import path
+import os
 import copy
 
 #note - numpy is used for array handling for the graph
@@ -36,7 +36,7 @@ INF = 9999999
 #   E - list to hold the roads (edges)
 def readFile(inFile, G, R, I, E):
     #first checks if the file exists in the current folder
-    if (path.exists(inFile)):
+    if (os.path.exists(inFile)):
         #opens the input file
         with (open(inFile,'r')) as file:
             isNodes = True
@@ -73,7 +73,9 @@ def readFile(inFile, G, R, I, E):
                     #reads in a node
                     else: 
                         E.append(line.replace("\n",""))     
-    else: sys.exit("Error: Invalid Input File Name: '" + inFile + "' could not be found.")           
+    else:
+        os.system('cls' if os.name == 'nt' else 'clear') 
+        sys.exit("Error: Invalid Input File Name: '" + inFile + "' could not be found.")           
 
 #prints the lists - used primarily for debugging purposes
 #takes in 4 lists:
@@ -282,48 +284,118 @@ def getTop(R, order, gNum, top = INF):
         print(printStr)       
 
 def main():
-    #user specifies the input file
-    inFile = input("\n\n\n\nPlease Enter the Name of Your Datafile:\n")
-    print("\n\n\n")
-    
-    #creates lists to hold each important part
+    run = True
+    badInput = False    
+    inFile = ""
+    #creates lists to hold each set of nodes
     G = [] #holds grocery stores
     R = [] #holds residential areas
     I = [] #holds intersections
     E = [] #holds edges
     
-    #reads the input file in
-    readFile(inFile,G,R,I,E)
+    while(run):
+        userIn = printMenu(badInput,inFile)
+        if(userIn == '1'):
+            badInput = False
+            os.system('cls' if os.name == 'nt' else 'clear')
+            
+            #reads the input file in
+            inFile = input("\nPlease Enter the Name of Your Datafile:\n\n\n\n")
+            readFile(inFile,G,R,I,E)
+        
+            #splits each item in each list on spaces
+            #i.e. ["R001 RA One"] becomes ["R001","RA","One"] 
+            for x in range(0,len(G)):
+                G[x] = G[x].split()
+            for x in range(0,len(R)):
+                R[x] = R[x].split()
+            for x in range(0,len(I)):
+                I[x] = I[x].split()
+            for x in range(0,len(E)):
+                E[x] = E[x].split()
+                
+            #adds a list that holds N, which contains all the nodes
+            N=[]
+            loadNodes(G,R,I,N)
     
-    #splits each item in each list on spaces
-    #i.e. ["R001 RA One"] becomes ["R001","RA","One"] 
-    for x in range(0,len(G)):
-        G[x] = G[x].split()
-    for x in range(0,len(R)):
-        R[x] = R[x].split()
-    for x in range(0,len(I)):
-        I[x] = I[x].split()
-    for x in range(0,len(E)):
-        E[x] = E[x].split()
+            #gets the adjacency matrix
+            graph=prepGraph(N,E) 
     
-    #adds a list that holds N, which contains all the nodes
-    N=[]
-    loadNodes(G,R,I,N)
+            #gets the Floyd-Warshall matrix from the adjacency matrix
+            path = pathGraph(graph)
+            
+            #gets the average distance to a number of grocery stores for each node,
+            #   then orders them from most avg dist to greatest
+            order = []
+            order = getIsol(path,len(G),len(R),len(G))
+            
+            print("\n\n\nFile Loaded Successfully")
+            print("\n\n\n\n\n\n\n")
+            input("Press Enter to Continue...")
+                
+        elif(userIn == '2'):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            #prints the output
+            print("\n")
+            getTop(R,order,len(G))
+            print("\n\n\n")
+            input("Press Enter to Continue...")
+            
+        
+        elif(userIn == '3'):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("\nComing Soon\n\n\n")
+            input("Press Enter to Continue...")
+        
+        elif(userIn == '4'):
+            os.system('cls' if os.name == 'nt' else 'clear')
+            run = False
+        
+        else:
+            badInput = True
     
-    #gets the adjacency matrix
-    graph=prepGraph(N,E) 
+#prints the user menu
+#   badInput is a boolean triggered if the user sends bad input
+#   inFile is the current input file
+#   if not called with a file name, assumes there is no loaded file
+def printMenu(badInput = False, inFile = ""):
+    if inFile == "":
+        inFile = "No File Loaded"
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print("""   
+           _____ _____ ______  _____ _____ 
+    /\   / ____/ ____|  ____|/ ____/ ____|
+   /  \ | |   | |    | |__  | (___| (___  
+  / /\ \| |   | |    |  __|  \___ \\___ \ 
+ / ____ | |___| |____| |____ ____) ____) |
+/______\_______\_____|____________|_____/ 
+ / ____|  __ \    /\   |  __ \| |  | |    
+| |  __| |__) |  /  \  | |__) | |__| |    
+| | |_ |  _  /  / /\ \ |  ___/|  __  |    
+| |__| | | \ \ / ____ \| |    | |  | |    
+ \_____|_|  \_/_/    \_|_|    |_|  |_|                                          
+                                                  """)
+    print("""\
+    WELCOME TO ACCESS GRAPH, v1.2.0
+        
+    Please select:
+            
+    1) Read New File
+        
+    2) Get Output
+        
+    3) Settings
+        
+    4) Quit
+        
+        """)
+    print("\n   Current File: " + inFile + "\n\n")
     
-    #gets the Floyd-Warshall matrix from the adjacency matrix
-    path = pathGraph(graph)
+    if(badInput):
+        print("\n   Error: Invalid Input. Please Try Again\n\n")
     
-    #gets the average distance to a number of grocery stores for each node,
-    #   then orders them from most avg dist to greatest
-    order = []
-    order = getIsol(path,len(G),len(R),len(G))
-    
-    #prints the output
-    getTop(R,order,len(G))
-    print("\n\n\n")
+    return input()
+
 
 #executes main function
 if __name__ == "__main__":
