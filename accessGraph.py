@@ -4,7 +4,7 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "1.4.0"
+__version__ = "1.4.1"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
 __status__ = "Release"
@@ -293,7 +293,7 @@ def main():
     R = [] #holds residential areas
     I = [] #holds intersections
     E = [] #holds edges
-    opt = [False,False,INF]
+    opt = [False,True,INF]
     optInput = '5'
     oFile = "output.txt"
     
@@ -433,7 +433,7 @@ def printMenu(badInput = False, inFile = ""):
      \_____|_|  \_/_/    \_|_|    |_|  |_|                                          
                                                   """)
     print("""\
-    WELCOME TO ACCESS GRAPH, v1.4.0
+    WELCOME TO ACCESS GRAPH, v1.4.1
     https://github.com/blake-harrison/access-graph
         
     Please select:
@@ -474,7 +474,7 @@ def optionsMenu(opt, oFile = "output.txt", bad = False):
         print("      [ ] To User         [X] To File ")
         print("                              (Current Output File: " + oFile + ")")
     print("\n\n    2) Rank Output By:\n")
-    if(not opt[1]):
+    if(opt[1]):
         print("      [X] Longest First   [ ] Shortest First ")
     else:
         print("      [ ] Longest First   [X] Shortest First ")
