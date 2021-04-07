@@ -496,7 +496,7 @@ def printMenu(badInput = False, inFile = ""):
      \_____|_|  \_/_/    \_|_|    |_|  |_|                                          
                                                   """)
     print("""\
-    WELCOME TO ACCESS GRAPH, v1.5.1
+    WELCOME TO ACCESS GRAPH, v1.5.2
     https://github.com/blake-harrison/access-graph
         
     Please select:
