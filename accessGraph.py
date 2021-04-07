@@ -4,11 +4,11 @@ __author__ = "Blake Harrison"
 __copyright__ = "Copyright 2021"
 __credits__ = [""]
 __license__ = "GPLv3"
-__version__ = "1.4.1"
+__version__ = "1.5.2"
 __maintainer__ = ""
 __email__ = "bharriso@highpoint.edu"
 __status__ = "Release"
-#This program was built using python v3.9.1. It has not been tested with other versions.
+#This program was built using python v3.9.0. It has not been tested with earlier versions
 
 import sys
 import os.path
@@ -195,18 +195,25 @@ def avgDist(graph,start,stop,num,node):
     
     #appends short with each length in order from shortest to longest
     #after a value has been added, it is set to our infinity approximation
+    val = INF
+    hold.append(val)
     for y in range(len(hold)):
         val = np.nanmin(hold)
         if(val!=INF and val!=np.nan):
             short.append(val)
-        hold[hold.index(val)]=INF
+        if(val == np.nan or val=='nan'):
+            continue
+        else:
+            hold[hold.index(val)]=INF
         
     #handles if the amount of added path lengths are less than the requested number
     # (this should only be true if the node does not have a path to some of the nodes
     #  in the start-stop range)
     if(len(short)<=num):
         num = len(short)
-        
+    
+    if(num == 0):
+        return 0    
     #sums the num smallest lengths
     for z in range(num):
         pathSum += short[z]
@@ -293,7 +300,7 @@ def main():
     R = [] #holds residential areas
     I = [] #holds intersections
     E = [] #holds edges
-    opt = [False,True,INF]
+    opt = [False,True,INF,'5']
     optInput = '5'
     oFile = "output.txt"
     
@@ -346,9 +353,15 @@ def main():
             
             #gets the average distance to a number of grocery stores for each node,
             #   then orders them from most avg dist to greatest
+            num = int(opt[3])
+            #if the requested number of grocery stores is greater than the number
+            #   present in the data set, sets it to all
+            if(num > len(G)):
+                num = len(G)
             order = []
             order.clear()
-            order = getIsol(path,len(G),len(R),len(G),opt[1])
+            #print(len(G),len(R),num,opt[1])
+            order = getIsol(path,len(G),len(R),num,opt[1])
             
             #prints the output
             if(not opt[0]):
@@ -366,9 +379,9 @@ def main():
                 input("    Press Enter to Continue...")
         
         elif(userIn == '3'):
-            optInput = '5'
+            optInput = '6'
             bad = False
-            while(optInput != '4'):
+            while(optInput != '5'):
                 os.system('cls' if os.name == 'nt' else 'clear')
                 optInput = optionsMenu(opt,oFile,bad)
                 if(optInput == '1'):
@@ -388,8 +401,9 @@ def main():
                 elif(optInput == '3'):
                     bad = False
                     setOptNum = True
+                    setOpt = '0'
                     while(setOptNum):
-                        if(not setOptNum):
+                        if(not setOpt.isnumeric()):
                             print("Error: You Must Input a Number")
                         os.system('cls' if os.name == 'nt' else 'clear')
                         setOpt = input("\n    Input a numeric value, or 'all':\n\n\n")
@@ -401,12 +415,61 @@ def main():
                             opt[2] = INF
                 elif(optInput == '4'):
                     bad = False
+                    setOptNum = True
+                    while(setOptNum):
+                        if(not opt[3].isnumeric()):
+                            print("Error: You Must Input a Number")
+                        os.system('cls' if os.name == 'nt' else 'clear')
+                        setOpt = input("\n    Input a numeric value:\n\n\n")
+                        if(not setOpt.isnumeric()):
+                            setOptNum = True
+                        if(setOpt.isnumeric()):
+                            opt[3] = setOpt
+                            setOptNum = False
+                elif(optInput == '5'):
+                    bad = False
                 else:
                     bad = True
         
         elif(userIn == '4'):
             os.system('cls' if os.name == 'nt' else 'clear')
             run = False
+        
+        elif(userIn == '13'):
+            debugNow = True
+            os.system('cls' if os.name == 'nt' else 'clear')
+            while(debugNow):
+                getNum = devMenu()
+                os.system('cls' if os.name == 'nt' else 'clear')
+                if(getNum == '0'):
+                    print("\n\n\n   G = \n")
+                    print(G)
+                    input("\n\n    Press Enter to Continue...")
+                elif(getNum == '1'):
+                    print("\n\n\n   R = \n")
+                    print(R)
+                    input("\n\n    Press Enter to Continue...")
+                elif(getNum == '2'):
+                    print("\n\n\n   I = \n")
+                    print(I)
+                    input("\n\n    Press Enter to Continue...")
+                elif(getNum == '3'):
+                    print("\n\n\n   E = \n")
+                    print(E)
+                    input("\n\n    Press Enter to Continue...")
+                elif(getNum == '4'):
+                    print("\n\n\n   N = \n")
+                    print(N)
+                elif(getNum == '5'):
+                    print("\n\n\n   graph = \n")
+                    print(graph)
+                    input("\n    Press Enter to Continue...")
+                elif(getNum == '6'):
+                    print("\n\n\n   path = \n")
+                    print(path)
+                    input("\n\n    Press Enter to Continue...")
+                elif(getNum == '7'):
+                    debugNow = False
         
         else:
             badInput = True
@@ -420,7 +483,7 @@ def printMenu(badInput = False, inFile = ""):
         inFile = "No File Loaded"
     os.system('cls' if os.name == 'nt' else 'clear')
     print("""   
-               _____ _____ ______  _____ _____ 
+              _____ _____ ______  _____ _____ 
         /\   / ____/ ____|  ____|/ ____/ ____|
        /  \ | |   | |    | |__  | (___| (___  
       / /\ \| |   | |    |  __|  \___ \\___  \ 
@@ -433,7 +496,7 @@ def printMenu(badInput = False, inFile = ""):
      \_____|_|  \_/_/    \_|_|    |_|  |_|                                          
                                                   """)
     print("""\
-    WELCOME TO ACCESS GRAPH, v1.4.1
+    WELCOME TO ACCESS GRAPH, v1.5.1
     https://github.com/blake-harrison/access-graph
         
     Please select:
@@ -485,10 +548,44 @@ def optionsMenu(opt, oFile = "output.txt", bad = False):
         print("      " + str(opt[2]))
     else:
         sys.exit("    An Error Occured. Value of Opt[2] not set properly. See function optionsMenu.\n")
-    print("\n\n    4) Return to Menu\n\n\n")
+    print("\n\n    4) Nearest Number of Grocery Stores to Check\n")
+    print("      " + str(opt[3]))
+    print("\n\n    5) Return to Menu\n\n\n")
     
     if(bad):
         print("    Error: Invalid Input Detected. Enter a Number Corresponding to One of the Options Above\n\n")
+    
+    return input()
+
+def devMenu():
+    
+    print("""
+    
+    This is the debug menu.
+    
+    You're not supposed to be in here.
+    
+    Unless you are.
+    
+    In which case, carry on.
+    
+    0. Print G
+    
+    1. Print R
+    
+    2. Print I
+    
+    3. Print E
+    
+    4. Print N
+    
+    5. Print graph
+    
+    6. Print path
+    
+    7. Return to Menu    
+          
+          """)
     
     return input()
 
