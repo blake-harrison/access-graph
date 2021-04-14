@@ -1,8 +1,19 @@
 # access-graph
-This program uses a version of the Floyd-Warshall algorithm to analyze a user-defined graph. 
+This program uses a version of the Floyd-Warshall algorithm to analyze a user-defined graph.
 
 ## Purpose
 This program was initially created to analyze food security within the city of High Point, North Carolina. It is intended to be open-source and modular, to allow users to apply this algorithm to other areas for access to food.
+
+
+## Function
+The user input will contain three different types of nodes:
+
+
+- R nodes, which designate a residential area
+- G nodes, which designate a grocery store (or other food retailer)
+- I nodes, which serve as "intersections". Their sole purpose is to enhance the connectivity of the graph
+
+The program will read these in (along with a list of edges) and then calculate the average distance for each R node to the nearest user-defined number (default: 3) of G nodes. 
 
 ## Preparation
 You should ensure that you have met the following criteria before you run this program:
@@ -70,3 +81,46 @@ The user menu will open and prompt you for input. Enter the number corresponding
 
 When reading from an input file, make sure that your input file is in the same directory as the accessGraph.py file.
 If it is not there, you need to either move it or provide a relative/absolute filepath to the program.
+
+
+## Example
+I am running macOS and have saved the files in my 'Downloads' folder.
+
+
+I can open a command prompt (Applications -> Utilities -> Terminal) and it will by default place me in my home directory.
+
+
+From there, I can enter the following command:
+
+
+`cd Downloads`
+
+
+I can then enter the command:
+
+
+`ls` 
+
+
+to see the contents of my folder (looking specifically for the accessGraph.py program and my input file, sample.txt)
+
+
+Then, I can do:
+
+
+`python3 accessGraph.py`
+
+
+And it will launch the program.
+
+
+From the main menu, I can enter '1' to read a new file. When prompted, I will enter:
+
+
+`sample.txt`
+
+
+Then hit enter to return to the main menu once the program tells me the file has been successfully read.
+
+
+From the main menu, I can then enter '2' to see my results.
