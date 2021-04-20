@@ -4,6 +4,9 @@ This program uses a version of the Floyd-Warshall algorithm to analyze a user-de
 ## Purpose
 This program was initially created to analyze food security within the city of High Point, North Carolina. It is intended to be open-source and modular, to allow users to apply this algorithm to other areas for access to food.
 
+You can a set of videos discussing the theory behind this program, the method for gathering data, and the results we found while using it here:
+https://youtube.com/playlist?list=PL8ILZOLY1ezMvprY_n4skLE37x6NIZCxf
+
 
 ## Function
 The user input will contain three different types of nodes:
@@ -63,7 +66,8 @@ and each edge line must take the format:
 `<node 1 code> <node 2 code> <distance between nodes>` 
 
 
-For more information about how you can gather data for an input file, you can watch the following video: (link)
+For more information about how you can gather data for an input file, you can watch the following video:
+https://youtu.be/t7SyDKqUXbw
 
 ## Using the Program
 
